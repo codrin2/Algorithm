@@ -43,8 +43,6 @@ public class Main {
                 }
             }
         }
-        long[] result = {arr[idx1], arr[idx2], arr[idx3]};
-        Arrays.sort(result);
         System.out.println(arr[idx1] + " " + arr[idx2] + " " + arr[idx3]);
     }
 }

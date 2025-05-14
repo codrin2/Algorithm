@@ -1,42 +1,39 @@
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.StringTokenizer;
+import java.io.*;
+import java.util.*;
 
 public class Main {
-    static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-    static BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
-    static StringTokenizer st = null;
-    public static void main(String[] args) throws Exception {
-        int t;
+    static int T;
 
-        t = Integer.parseInt(br.readLine());
-        for (int tc = 0; tc < t; tc++) {
-            int k;
-            int[] novel;
-            int[] sum;
-            int[][] dp;
-            k = Integer.parseInt(br.readLine());
-            novel = new int[k + 1];
-            dp = new int[k + 1][k + 1];
-            sum = new int[k + 1];
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
+        T = Integer.parseInt(br.readLine());
+        for(int l=0;l<T;l++){
+            int K = Integer.parseInt(br.readLine());
             st = new StringTokenizer(br.readLine());
-            for (int i = 1; i <= k; i++) {
-                novel[i] = Integer.parseInt(st.nextToken());
-                sum[i] = sum[i - 1] + novel[i];
+            int[] file = new int[K+1];
+            int[] prefixSum = new int[K+1];
+            int[][] dp = new int[K+1][K+1];
+            for (int i=1;i<K+1;i++){
+                file[i] = Integer.parseInt(st.nextToken());
             }
-            for (int n = 1; n <= k; n++) {
-                for (int from = 1; from + n <= k; from++) {
-                    int to = from + n;
-                    dp[from][to] = Integer.MAX_VALUE;
-                    for (int divide = from; divide < to; divide++) {
-                        dp[from][to] = Math.min(dp[from][to], dp[from][divide] + dp[divide + 1][to] + sum[to] - sum[from - 1]);
+            // 누적합 구하기
+            for (int i = 1; i < K + 1; i++) {
+                prefixSum[i] = prefixSum[i-1] + file[i];
+            }
+            // 점화식 dp[i][j] -> i부터 j까지 파일합병 최소 비용
+            // bottom up 방식
+            for(int len =2;len<=K;len++){
+                for(int i=1;i<=K-len+1;i++){
+                    int j = i+len-1;
+                    dp[i][j] = Integer.MAX_VALUE;
+                    for(int k=i;k<j;k++){
+                        int cost = dp[i][k] + dp[k+1][j] + prefixSum[j]-prefixSum[i-1];
+                        dp[i][j] = Math.min(dp[i][j], cost);
                     }
                 }
             }
-            System.out.println(dp[1][k]);
+            System.out.println(dp[1][K]);
         }
     }
-
 }

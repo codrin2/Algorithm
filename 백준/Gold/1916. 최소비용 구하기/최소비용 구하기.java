@@ -1,76 +1,76 @@
-import java.util.*;
 import java.io.*;
+import java.util.*;
 
-public class Main{
-    static int N;
-    static boolean[] visited;
-    static long[] dijkstra;
+class Node implements Comparable<Node> {
+    int idx;
+    int val;
+    public Node(int idx, int val) {
+        this.idx = idx;
+        this.val = val;
+    }
+    @Override
+    public int compareTo(Node o) {
+        return this.val - o.val;
+    }
+}
+
+class Edge {
+    int to, weight;
+    public Edge(int to, int weight) {
+        this.to = to;
+        this.weight = weight;
+    }
+}
+
+public class Main {
+    static int cityCnt, busCnt;
+    static int[] dis;
+    static List<List<Edge>> graph = new ArrayList<>();
 
     public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        cityCnt = Integer.parseInt(br.readLine());
+        busCnt = Integer.parseInt(br.readLine());
+        dis = new int[cityCnt + 1];
 
-        N = Integer.parseInt(br.readLine());
-        int M = Integer.parseInt(br.readLine());
+        Arrays.fill(dis, Integer.MAX_VALUE);
 
-        long[][] map = new long[N][N];
-
-        for(int i = 0; i<N; i++)
-            for(int j = 0; j<N; j++){
-                if(i == j) {
-                    map[i][j] = 0;
-                    continue;
-                }
-
-                map[i][j] = Integer.MAX_VALUE;
-            }
-
-        for(int i = 0; i<M; i++){
-            StringTokenizer st = new StringTokenizer(br.readLine());
-
-            int row = Integer.parseInt(st.nextToken()) - 1;
-            int col = Integer.parseInt(st.nextToken()) - 1;
-            int val = Integer.parseInt(st.nextToken());
-
-            // 같은 경로가 여러 번 들어올 경우 가장 작은 weight 값을 저장
-            map[row][col] = Math.min(map[row][col], val);
+        for(int i = 0; i < cityCnt+1; i++){
+            graph.add(new ArrayList<>());
         }
 
-        StringTokenizer st = new StringTokenizer(br.readLine());
-
-        int start = Integer.parseInt(st.nextToken()) - 1;
-        int to = Integer.parseInt(st.nextToken()) - 1;
-
-        dijkstra = map[start].clone();
-
-        visited = new boolean[N];
-        visited[start] = true;
-
-        for(int i = 1; i<N; i++) {
-            int idx = choose();
-            visited[idx] = true;
-
-            for(int j = 0; j < N; j++)
-                if(!visited[j])
-                    dijkstra[j] = Math.min(dijkstra[j], dijkstra[idx] + map[idx][j]);
+        StringTokenizer st;
+        for(int i = 0; i < busCnt; i++){
+            st = new StringTokenizer(br.readLine());
+            int start = Integer.parseInt(st.nextToken());
+            int end = Integer.parseInt(st.nextToken());
+            int cost = Integer.parseInt(st.nextToken());
+            graph.get(start).add(new Edge(end, cost));
         }
 
-        System.out.println(dijkstra[to]);
+        st = new StringTokenizer(br.readLine());
+        int start = Integer.parseInt(st.nextToken());
+        int end = Integer.parseInt(st.nextToken());
+
+        dijkstra(start);
+        System.out.println(dis[end]);
     }
 
-    static int choose(){
-        int minIdx = 0;
-        long min = Integer.MAX_VALUE;
-
-        for(int i = 0; i<N; i++){
-            if(visited[i])
-                continue;
-
-            if(min>dijkstra[i]){
-                min = dijkstra[i];
-                minIdx = i;
+    static void dijkstra(int start) {
+        PriorityQueue<Node> pq = new PriorityQueue<>();
+        pq.add(new Node(start, 0));
+        dis[start] = 0;
+        while(!pq.isEmpty()){
+            Node now = pq.poll();
+            if(dis[now.idx] < now.val) continue;
+            List<Edge> edges = graph.get(now.idx);
+            for(Edge edge : edges){
+                int cost = edge.weight;
+                if(dis[now.idx] + cost < dis[edge.to]){
+                    dis[edge.to] = Math.min(dis[edge.to], dis[now.idx] + cost);
+                    pq.add(new Node(edge.to, dis[edge.to]));
+                }
             }
         }
-
-        return minIdx;
     }
 }

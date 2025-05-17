@@ -1,89 +1,60 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.StringTokenizer;
+import java.io.*;
+import java.util.*;
 
 class Edge {
-    int des;
-    int wt;
-
-    public Edge(int des, int wt) {
-        this.des = des;
-        this.wt = wt;
+    int start, end, cost;
+    public Edge(int start, int end, int cost) {
+        this.start = start;
+        this.end = end;
+        this.cost = cost;
     }
 }
 
 public class Main {
-    public static int n, m, INF=Integer.MAX_VALUE;
-    public static long[] dis;
-    public static ArrayList<ArrayList<Edge>> graph = new ArrayList<>();
+    static int INF = 10000001;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringBuilder sb = new StringBuilder();
         StringTokenizer st = new StringTokenizer(br.readLine());
-        n = Integer.parseInt(st.nextToken());
-        m = Integer.parseInt(st.nextToken());
-        dis = new long[n + 1];
+        int N = Integer.parseInt(st.nextToken());
+        int M = Integer.parseInt(st.nextToken());
+        long[] dis = new long[N+1]; // 1~N번 도시
+        List<Edge> edges = new ArrayList<>();
 
-        for (int i = 0; i <= n; i++) {
-            graph.add(new ArrayList<>());
-            dis[i] = INF;
-        }
-
-        for (int i = 0; i < m; i++) {
+        for (int i = 0; i < M; i++) {
             st = new StringTokenizer(br.readLine());
-            int source = Integer.parseInt(st.nextToken());
-            int destination = Integer.parseInt(st.nextToken());
-            int weight = Integer.parseInt(st.nextToken());
-            graph.get(source).add(new Edge(destination, weight));
+            int start = Integer.parseInt(st.nextToken());
+            int end = Integer.parseInt(st.nextToken());
+            int cost = Integer.parseInt(st.nextToken());
+            edges.add(new Edge(start, end, cost));
         }
-
-        if (bellmanpord()) {
-            sb.append(-1);
-        } else {
-            for (int i = 2; i < n + 1; i++) {
-                if (dis[i] == INF) {
-                    sb.append(-1).append("\n");
-                } else {
-                    sb.append(dis[i]).append("\n");
-                }
-            }
-        }
-
-        System.out.println(sb);
-
-
-
-    }
-
-    public static boolean bellmanpord() {
+        Arrays.fill(dis, INF);
         dis[1] = 0;
-        boolean update = false;
 
-        for (int i = 1; i < n; i++) {
-            update = false;
-            for (int j = 1; j <= n; j++) {
-                for (Edge temp : graph.get(j)) {
-                    if (dis[j]!=INF&&dis[temp.des]>dis[j]+temp.wt) {
-                        dis[temp.des] = dis[j] + temp.wt;
-                        update = true;
-                    }
-                }
-            }
-            if (!update) {
-                break;
-            }
-        }
-        for (int j = 1; j <= n; j++) {
-            for (Edge temp : graph.get(j)) {
-                if (dis[j]!=INF&&dis[temp.des]>dis[j]+temp.wt) {
-                    dis[temp.des] = dis[j] + temp.wt;
-                    return true;
+
+        // 벨만포드
+        for (int i = 0; i < N - 1; i++) {
+            for (Edge edge : edges) {
+                if(dis[edge.start] != INF && dis[edge.end] > dis[edge.start] + edge.cost) {
+                    dis[edge.end] = dis[edge.start] + edge.cost;
                 }
             }
         }
-        return false;
+
+        // 음수 사이클
+        for (Edge edge : edges) {
+            if(dis[edge.start] != INF && dis[edge.end] > dis[edge.start] + edge.cost) {
+                System.out.println(-1);
+                return;
+            }
+        }
+
+        for(int i = 2; i < N+1; i++) {
+            if (dis[i] == INF) {
+                System.out.println(-1);
+            } else {
+                System.out.println(dis[i]);
+            }
+        }
     }
 }
